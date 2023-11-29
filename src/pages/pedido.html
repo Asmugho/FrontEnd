@@ -11,11 +11,10 @@
         <div class="topbar">
             <a class="removeLink topbarBtn homeBtn" href="../../index.html"><i class="material-icons">home</i></a>
             <div class="pageBtns">
-                <a class="removeLink topbarBtn" href="./src/pages/">PEDIDOS</a>
-                <a class="removeLink topbarBtn" href="./src/pages/">PRODUTOS</a>
+                <a class="removeLink topbarBtn" href="./pedido.html">PEDIDOS</a>
+                <a class="removeLink topbarBtn" href="./produto.html">PRODUTOS</a>
                 <a class="removeLink topbarBtn" href="./src/pages/">CLIENTES</a>
-                <a class="removeLink topbarBtn" href="./src/pages/">ENTREGADORES</a>
-                <a class="removeLink topbarBtn" href="./src/pages/">ESTOQUE</a>
+                <a class="removeLink topbarBtn" href="./src/pages/">FORMA PGTOS</a>
             </div>
             <img class="topbarLogo" src="../images/logo.png" alt="">
         </div>
@@ -33,7 +32,7 @@
                         <div class="closeBtn" onclick="testRequest()">TESTAR REQUEST</div>
                     </div>
                     <table id="table" class="table">
-                        <tr class="pedidosTd">
+                        <tr class="tableTd">
                             <th>Nº</th> <th>Cliente</th> <th>Apartamento</th> <th>Bloco</th> <th>Valor</th> <th>Ações</th>
                         </tr>
     
@@ -72,16 +71,15 @@
                                 <input type='checkbox' id="checkboxIsPago">
                                 <span class="material-icons">check</span>
                             </label>
-
                         </div>
                         <div class="inputRow">
                             <div class="label">
                                 Nº do Pedido:<br>
-                                <input id="inputPedido" class="input" type="text">
+                                <input id="inputPedido" class="input" type="text" disabled>
                             </div>
                             <div class="label center">
                                 Horário do Pedido:<br>
-                                <input id="inputHorario" class="input" type="time">
+                                <input id="inputHorario" class="input" type="time" disabled>
                             </div>
                             <div class="label center">
                                 Horário de Reserva:<br>
@@ -106,10 +104,6 @@
                             <div class="label">
                                 Torre:<br>
                                 <input id="inputTorre" class="input xsmallw" type="text" disabled>
-                                <!-- <select id="selectTorre" class="input" name="selectTorre">
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                </select> -->
                             </div>
                             <div class="label">
                                 Forma de Pgto:<br>
@@ -130,7 +124,7 @@
                         </div>
 
                         <table id="tableProdutos" class="table">
-                            <tr id="produtoHeaders" class="pedidosTd">
+                            <tr id="produtoHeaders" class="tableTd">
                             </tr>
                         </table>
                     </div>
@@ -252,12 +246,12 @@
             var row = document.createElement('tr')
 
             row.innerHTML = `
-                <td class="pedidosTd"> ${pedido.id} </td>
-                <td class="pedidosTd"> ${pedido.cliente.descricao} </td>
-                <td class="pedidosTd"> ${pedido.cliente.apt} </td>
-                <td class="pedidosTd"> ${pedido.cliente.torre} </td>
-                <td class="pedidosTd"> R$ ${pedido.valortotal} </td>
-                <td class="pedidosTd"> 
+                <td class="tableTd"> ${pedido.id} </td>
+                <td class="tableTd"> ${pedido.cliente.descricao} </td>
+                <td class="tableTd"> ${pedido.cliente.apt} </td>
+                <td class="tableTd"> ${pedido.cliente.torre} </td>
+                <td class="tableTd"> R$ ${pedido.valortotal} </td>
+                <td class="tableTd"> 
                     <span class="tablebtn_v" onclick="viewItem(${pedido.id})"><i class="material-icons">remove_red_eye</i></span>    
                     <span class="tablebtn_e" onclick="editItem(${pedido.id})"><i class="material-icons">edit</i></span>    
                     <span class="tablebtn_d" onclick="del(${pedido.id})"><i class="material-icons">delete</i></span>
@@ -324,8 +318,6 @@
         let tituloCliente = document.getElementById('clienteSlot')
         document.getElementById('checkboxIsEntregue').setAttribute('disabled', true)
         document.getElementById('checkboxIsPago').setAttribute('disabled', true)
-        document.getElementById('inputPedido').setAttribute('disabled', true)
-        document.getElementById('inputHorario').setAttribute('disabled', true)
         document.getElementById('inputReserva').setAttribute('disabled', true)
         document.getElementById('inputEntrega').setAttribute('disabled', true)
         document.getElementById('selectClientes').setAttribute('disabled', true)
@@ -337,6 +329,7 @@
         if (id){
             pedidos.forEach((pedido) => {
                 if(pedido.id == id){
+                    console.log(pedido)
                     pedidoAtual = pedido
                     
                     tituloId.textContent = pedido.id
@@ -346,9 +339,9 @@
                     document.getElementById('checkboxIsEntregue').checked = pedido.isentregue
                     document.getElementById('checkboxIsPago').checked = pedido.ispago
                     document.getElementById('inputPedido').value = pedido.id
-                    document.getElementById('inputHorario').value = pedido.pedHora
-                    document.getElementById('inputReserva').value = pedido.resHora
-                    document.getElementById('inputEntrega').value = pedido.entHora
+                    document.getElementById('inputHorario').value = pedido.pedhora
+                    document.getElementById('inputReserva').value = pedido.reshora
+                    document.getElementById('inputEntrega').value = pedido.enthora
                     document.getElementById('inputApt').value = pedido.cliente.apt
                     document.getElementById('inputTorre').value = pedido.cliente.torre
                     document.getElementById('selectClientes').value = pedido.fk_cliente
@@ -376,8 +369,6 @@
         let tituloCliente = document.getElementById('clienteSlot')
         document.getElementById('checkboxIsEntregue').removeAttribute('disabled')
         document.getElementById('checkboxIsPago').removeAttribute('disabled')
-        document.getElementById('inputPedido').setAttribute('disabled', true)
-        document.getElementById('inputHorario').removeAttribute('disabled')
         document.getElementById('inputReserva').removeAttribute('disabled')
         document.getElementById('inputEntrega').removeAttribute('disabled')
         document.getElementById('selectClientes').removeAttribute('disabled')
@@ -385,7 +376,6 @@
         document.getElementById('selectProduto').classList.remove('hidden')
         document.getElementById('addProdutoBtn').classList.remove('hidden')
 
-        
         if (id){
             pedidos.forEach((pedido) => {
                 if(pedido.id == id){
@@ -398,16 +388,15 @@
                     document.getElementById('checkboxIsEntregue').checked = pedido.isentregue
                     document.getElementById('checkboxIsPago').checked = pedido.ispago
                     document.getElementById('inputPedido').value = pedido.id
-                    document.getElementById('inputHorario').value = pedido.pedHora
-                    document.getElementById('inputReserva').value = pedido.resHora
-                    document.getElementById('inputEntrega').value = pedido.entHora
+                    document.getElementById('inputHorario').value = pedido.pedhora
+                    document.getElementById('inputReserva').value = pedido.reshora
+                    document.getElementById('inputEntrega').value = pedido.enthora
                     document.getElementById('inputApt').value = pedido.cliente.apt
                     document.getElementById('inputTorre').value = pedido.cliente.torre
                     document.getElementById('selectClientes').value = pedido.fk_cliente
                     document.getElementById('selectForPgto').value = pedido.fk_forpgto
                     clearTableProdutos()
                     loadTableProdutos(pedido.pedidoItens, mode)
-                    
                 }
             })
 
@@ -426,8 +415,6 @@
 
         document.getElementById('checkboxIsEntregue').removeAttribute('disabled')
         document.getElementById('checkboxIsPago').removeAttribute('disabled')
-        document.getElementById('inputPedido').removeAttribute('disabled')
-        document.getElementById('inputHorario').removeAttribute('disabled')
         document.getElementById('inputReserva').removeAttribute('disabled')
         document.getElementById('inputEntrega').removeAttribute('disabled')
         document.getElementById('selectClientes').removeAttribute('disabled')
@@ -448,7 +435,6 @@
         let pedido
         pedido = {
             id: id,
-            pedhora: document.getElementById('inputHorario').value,
             reshora: document.getElementById('inputReserva').value,
             enthora: document.getElementById('inputEntrega').value,
             fk_cliente: document.getElementById('selectClientes').value,
@@ -463,9 +449,8 @@
         if (tableitens.children){
             for (var i = tableitens.rows.length - 1; i > 0; i--){
                 console.log(tableitens.children[i])
-                var cells = tableitens.rows[i].querySelectorAll('.pedidosTd')
+                var cells = tableitens.rows[i].querySelectorAll('.tableTd')
 
-                // console.log(cells[2].children[0].value)
                 pedido.pedidoItens.push({
                     fk_produto: cells[1].innerText.split(' - ')[0],
                     obs: cells[2].children[0].value
@@ -501,7 +486,6 @@
                 console.error('Erro na requisição POST:', error);
             });
             setTimeout(() => {
-                // location.reload();
                 refreshTable()
                 closeDialog()
             }, 500)
@@ -542,20 +526,16 @@
                 let row = document.createElement('tr')
                 console.log('modo', dialogMode)
                 row.innerHTML = `
-                    <td class="pedidosTd"> ${prodContador} </td> 
-                    <td class="pedidosTd"> ${item.descricao} </td>
-                    <td class="pedidosTd"> <input class="input" type="text" value="${item.obs}" ${dialogMode > 0 ? '' : 'disabled'}></input> </td>
-                    <td class="pedidosTd"> R$ ${item.valor} </td>
+                    <td class="tableTd"> ${prodContador} </td> 
+                    <td class="tableTd"> ${item.descricao} </td>
+                    <td class="tableTd"> <input class="input" type="text" value="${item.obs}" ${dialogMode > 0 ? '' : 'disabled'}></input> </td>
+                    <td class="tableTd"> R$ ${item.valor} </td>
                     ${mode > 0 ? `
-                        <td class="pedidosTd"> 
+                        <td class="tableTd"> 
                             <span id="prod-${prodContador}" class="tablebtn_d" onclick="removeProduto('prod-${prodContador}')">D</span>    
                         </td>
                     ` : ''}
                 `
-                
-                // <td class="pedidosTd"> 
-                //     <span id="prod-${prodContador}" class="tablebtn_d" onclick="removeProduto('prod-${prodContador}')">D</span>    
-                // </td>
 
                 console.log(row)
 
@@ -583,11 +563,11 @@
                     var row = document.createElement('tr')
 
                     row.innerHTML = `
-                        <td class="pedidosTd"> ${prodContador} </td>
-                        <td class="pedidosTd"> ${produto.descricao} </td>
-                        <td class="pedidosTd"><input class="input" type="text"></input></td>
-                        <td class="pedidosTd"> R$ ${produto.valor} </td>
-                        <td class="pedidosTd"> 
+                        <td class="tableTd"> ${prodContador} </td>
+                        <td class="tableTd"> ${produto.descricao} </td>
+                        <td class="tableTd"><input class="input" type="text"></input></td>
+                        <td class="tableTd"> R$ ${produto.valor} </td>
+                        <td class="tableTd"> 
                             <span id="prod-${prodContador}" class="tablebtn_d" onclick="removeProduto('prod-${prodContador}')"><i class="material-icons">delete</i></span>    
                         </td>
                     `
@@ -603,9 +583,6 @@
         pedidoAtual.itensPedido.forEach((item, index) => {
             let itemIndex = id.split('-')[1] - 1
             if (index == itemIndex) {
-                // console.log(index)
-                // console.log(itemIndex)
-                // console.log(pedidoAtual.itensPedido)
                 pedidoAtual.itensPedido.splice(itemIndex, 1)
             }
         })

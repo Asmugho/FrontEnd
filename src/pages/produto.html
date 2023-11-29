@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <link rel="stylesheet" href="../css/main.css">
+        <title>Home - ERPizza</title>
+    </head>
+    <body onload="initialize()">
+        <div class="topbar">
+            <a class="removeLink topbarBtn homeBtn" href="../../index.html"><i class="material-icons">home</i></a>
+            <div class="pageBtns">
+                <a class="removeLink topbarBtn" href="./pedido.html">PEDIDOS</a>
+                <a class="removeLink topbarBtn" href="./produto.html">PRODUTOS</a>
+                <a class="removeLink topbarBtn" href="./src/pages/">CLIENTES</a>
+                <a class="removeLink topbarBtn" href="./src/pages/">FORMA PGTOS</a>
+            </div>
+            <img class="topbarLogo" src="../images/logo.png" alt="">
+        </div>
+
+        <div class="container">
+            <div class="card">
+                <div class="card-titlebar">
+                    <span>PRODUTOS</span>
+                </div>
+
+                <div class="card-body">
+                    <div class="inputRow">
+                        <div class="closeBtn" onclick="refreshTable()">Atualizar Tabela</div>
+                        <div class="closeBtn" onclick="newItem()">Novo Pedido</div>
+                        <div class="closeBtn" onclick="testRequest()">TESTAR REQUEST</div>
+                    </div>
+                    <table id="table" class="table">
+                        <tr class="tableTd">
+                            <th>Nº</th> <th>Produto</th> <th>Valor</th> <th>Ativo?</th> <th>Ações</th>
+                        </tr>
+    
+                        <!-- linhas serão inseridas aqui -->
+                    </table>
+                </div>
+            </div>
+    
+            <div id="dialogMain" class="dialogBlackBG hidden"> <!-- hidden -->
+                <div class="dialog">
+                    <div class="card-titlebar">
+                        <span class="cardTitle"><span id="modeSlot"></span></span>
+                        <div class="cardBtns">
+                            <div class="closeBtn" onclick="closeDialog()">Fechar</div>
+                            <div id="saveBtn" class="saveBtn hidden" onclick="save()">Salvar</div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="inputRow">
+                            <div class="label">
+                                Nº do Pedido:<br>
+                                <input id="inputId" class="input" type="text" disabled>
+                            </div>
+                            <div class="label">
+                                Nome do Produto:<br>
+                                <input id="inputNomeProd" class="input type="text">
+                            </div>
+                            <div class="label">
+                                Valor:<br>
+                                <input id="inputValor" class="input smallw" type="text">
+                            </div>
+                            <label class="chkbxlabel">
+                                Ativo?
+                                <input type='checkbox' id="checkboxIsAtivo">
+                                <span class="material-icons">check</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+<script>
+    var idProduto
+    var produtoAtual
+    var mode // 0 = Visualização; 1 = Edição; 2 = Criação
+
+    var produtos = []
+
+    function refreshTable() {
+        clearTable()
+        listProdutos()
+    }
+
+    function initialize() {
+        listProdutos()
+    }
+
+    function listProdutos() {
+        let url = "http://localhost:3000/listProdutos";
+        axios.get(url).then(response => {
+            console.log(response.data)
+            produtos = response.data
+            loadTable()
+        })
+    }
+
+    function loadTable() {
+        produtos.forEach((produto) => {
+            console.log(produto)
+            var row = document.createElement('tr')
+
+            row.innerHTML = `
+                <td class="tableTd"> ${produto.id} </td>
+                <td class="tableTd"> ${produto.nomeproduto} </td>
+                <td class="tableTd"> ${produto.valor} </td>
+                <td class="tableTd"> ${produto.isativo} </td>
+                <td class="tableTd"> 
+                    <span class="tablebtn_v" onclick="viewItem(${produto.id})"><i class="material-icons">remove_red_eye</i></span>    
+                    <span class="tablebtn_e" onclick="editItem(${produto.id})"><i class="material-icons">edit</i></span>    
+                    <span class="tablebtn_d" onclick="del(${produto.id})"><i class="material-icons">delete</i></span>
+                </td>
+            `
+
+            table.appendChild(row)
+        })
+    }
+
+    function clearTable(){
+        let table = document.getElementById("table")
+
+        if (table.children){
+            for (var i = table.rows.length - 1; i > 0; i--){
+                table.deleteRow(i)
+            }
+        }
+    }
+
+    function newItem() {
+        mode = 2
+        pedidoAtual = {}
+        
+        let dialog = document.getElementById('dialogMain')
+        let saveBtn = document.getElementById('saveBtn')
+        let modeSlot = document.getElementById('modeSlot')
+        
+        modeSlot.textContent = 'Criando Produto'
+
+        // ATRIBUIÇÃO VALOR INPUTS
+        document.getElementById('inputId').value = ''
+        document.getElementById('inputNomeProd').value = ''
+        document.getElementById('inputValor').value = ''
+        document.getElementById('checkboxIsAtivo').value = false
+
+        if (saveBtn.classList.contains('hidden')){
+            saveBtn.classList.remove('hidden')
+        }
+        if (dialog.classList.contains('hidden')){
+            dialog.classList.remove('hidden')
+        }
+    }
+    function viewItem(id) {
+        mode = 0
+
+        let dialog = document.getElementById('dialogMain')
+        let modeSlot = document.getElementById('modeSlot')
+        document.getElementById('inputNomeProd').setAttribute('disabled', true)
+        document.getElementById('inputValor').setAttribute('disabled', true)
+        document.getElementById('checkboxIsAtivo').setAttribute('disabled', true)
+        
+        
+        // PEGA OS INPUTS PARA ATRIBUIÇÃO DO VALOR
+        if (id){
+            produtos.forEach((produto) => {
+                if(produto.id == id){
+                    produtoAtual = produto
+                    modeSlot.textContent = 'Visualizando Produto'
+                    
+                    // ATRIBUIÇÃO VALOR INPUTS
+                    document.getElementById('inputId').value = produto.id
+                    document.getElementById('inputNomeProd').value = produto.nomeproduto
+                    document.getElementById('inputValor').value = produto.valor
+                    document.getElementById('checkboxIsAtivo').checked = produto.isativo
+                }
+
+                if (dialog.classList.contains('hidden')){
+                    dialog.classList.remove('hidden')
+                }
+            })
+        }
+    }
+    function editItem(id) {
+        mode = 1
+
+        let dialog = document.getElementById('dialogMain')
+        let saveBtn = document.getElementById('saveBtn')
+        let modeSlot = document.getElementById('modeSlot')
+        document.getElementById('inputNomeProd').removeAttribute('disabled')
+        document.getElementById('inputValor').removeAttribute('disabled', true)
+        document.getElementById('checkboxIsAtivo').removeAttribute('disabled')
+        
+        if (id){
+            produtos.forEach((produto) => {
+                if(produto.id == id){
+                    produtoAtual = produto
+                    modeSlot.textContent = 'Editando Produto'
+
+                    // ATRIBUIÇÃO VALOR INPUTS
+                    document.getElementById('inputId').value = produto.id
+                    document.getElementById('inputNomeProd').value = produto.nomeproduto
+                    document.getElementById('inputValor').value = produto.valor
+                    document.getElementById('checkboxIsAtivo').checked = produto.isativo
+                }
+            })
+
+            if (saveBtn.classList.contains('hidden')){
+                saveBtn.classList.remove('hidden')
+            }
+            if (dialog.classList.contains('hidden')){
+                dialog.classList.remove('hidden')
+            }
+        }
+    }
+
+    function closeDialog() {
+        let dialog = document.getElementById('dialogMain')
+        let saveBtn = document.getElementById('saveBtn')
+
+        document.getElementById('inputNomeProd').removeAttribute('disabled')
+        document.getElementById('inputValor').removeAttribute('disabled')
+        document.getElementById('checkboxIsAtivo').removeAttribute('disabled')
+
+        saveBtn.classList.add('hidden')
+        dialog.classList.add('hidden')
+
+        prodContador = 0
+    }
+
+    // ####################### CALL SERVICES BACK-END ###############################
+
+    function save(){
+        let id = produtoAtual ? produtoAtual.id : ''
+        let produto
+        produto = {
+            id: id,
+            nomeproduto: document.getElementById('inputNomeProd').value,
+            valor: document.getElementById('inputValor').value,
+            isativo: document.getElementById('checkboxIsAtivo').checked,
+        }
+
+        console.log(mode)
+        console.log(produto)
+
+        if(mode == 1){ // MODO EDIÇÃO
+            requestbackend('updateProduto', produto, true)
+        }
+        else if(mode == 2){ // MODO CRIAÇÃO
+            requestbackend('newProduto', produto, true)
+        }
+    }
+    async function del(id){
+        console.log(id)
+        let data = {
+            id: id
+        }
+        await requestbackend('delProduto', data, true)
+        
+    }
+
+    function requestbackend(module, data, ispost) {
+        const target = `http://localhost:3000/${module}`
+        if (ispost == true) {
+            axios.post(target, data)
+            .then(response => {
+                console.log('Resposta da requisição POST:', response.data);
+            })
+            .catch(error => {
+                console.error('Erro na requisição POST:', error);
+            });
+            setTimeout(() => {
+                refreshTable()
+                closeDialog()
+            }, 500)
+        }
+        else {
+            axios.get(target, data)
+            .then(response => {
+                console.log('Resposta da requisição POST:', response.data);
+            })
+            .catch(error => {
+                console.error('Erro na requisição POST:', error);
+            });
+        }
+        
+    }
+</script>
