@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <link rel="stylesheet" href="./src/css/main.css">
+        <title>Home - ERPizza</title>
+    </head>
+    <body onload="loadButtons()" class="fade-in">
+        <img class="menu_logo" src="./src/images/logo.png" alt="">
+        <div id="container" class="MainBtn_Container">
+            <!-- botões das páginas inseridos aqui -->
+        </div>
+    </body>
+</html>
+<script>
+    let pages = [
+        { rota: "./src/pages/pedido.html", titulo: "PEDIDOS", icon: "assignment" },
+        { rota: "./src/pages/pedido.html", titulo: "CLIENTES", icon: "face" },
+        { rota: "./src/pages/pedido.html", titulo: "FORMA<br>PGTO", icon: "credit_card" },
+        { rota: "./src/pages/pedido.html", titulo: "PRODUTOS", icon: "shopping_basket" },
+    ]
+    
+    function loadButtons() {
+        const container = document.getElementById('container')
+        
+        pages.forEach((page) => {
+            let btn = document.createElement('div')
+            btn.innerHTML = `
+                <a class="mainBtn removeLink" href="${page.rota}">
+                    <i class="material-icons mainBtn_icon">${page.icon}</i>
+                    <span class="mainBtn_text">${page.titulo}</span>
+                </div>
+            `
+
+            container.appendChild(btn)
+        });
+        
+        console.log(pages.pedidos)
+    }
+    
+</script>

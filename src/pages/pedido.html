@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <link rel="stylesheet" href="../css/main.css">
+        <title>Home - ERPizza</title>
+    </head>
+    <body onload="initialize()">
+        <div class="topbar">
+            <a class="removeLink topbarBtn homeBtn" href="../../index.html"><i class="material-icons">home</i></a>
+            <div class="pageBtns">
+                <a class="removeLink topbarBtn" href="./src/pages/">PEDIDOS</a>
+                <a class="removeLink topbarBtn" href="./src/pages/">PRODUTOS</a>
+                <a class="removeLink topbarBtn" href="./src/pages/">CLIENTES</a>
+                <a class="removeLink topbarBtn" href="./src/pages/">ENTREGADORES</a>
+                <a class="removeLink topbarBtn" href="./src/pages/">ESTOQUE</a>
+            </div>
+            <img class="topbarLogo" src="../images/logo.png" alt="">
+        </div>
+
+        <div class="container">
+            <div class="card">
+                <div class="card-titlebar">
+                    <span>PEDIDOS</span>
+                </div>
+
+                <div class="card-body">
+                    <div class="inputRow">
+                        <div class="closeBtn" onclick="refreshTable()">Atualizar Tabela</div>
+                        <div class="closeBtn" onclick="newItem()">Novo Pedido</div>
+                        <div class="closeBtn" onclick="testRequest()">TESTAR REQUEST</div>
+                    </div>
+                    <table id="table" class="table">
+                        <tr class="pedidosTd">
+                            <th>Nº</th> <th>Cliente</th> <th>Apartamento</th> <th>Bloco</th> <th>Valor</th> <th>Ações</th>
+                        </tr>
+    
+                        <!-- linhas serão inseridas aqui -->
+                    </table>
+                </div>
+            </div>
+    
+            <div id="dialogMain" class="dialogBlackBG hidden"> <!-- hidden -->
+                <div class="dialog">
+                    <div class="card-titlebar">
+                        <span class="cardTitle">Pedido Nº: <span id="idSlot"></span> - Cliente: <span id="clienteSlot"></span></span>
+                        <div class="cardBtns">
+                            <div class="closeBtn" onclick="closeDialog()">Fechar</div>
+                            <div id="saveBtn" class="saveBtn hidden" onclick="save()">Salvar</div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="inputRow">
+                            <!-- <div class="label">
+                                Entregue?: <input type="checkbox" id="checkboxIsentregue" name="isentregue"><i class="material-icons mainBtn_icon"></i>
+                            </div>
+                            
+                            <div class="label">
+                                Pago?: <input type="checkbox" id="checkboxIspago" name="ispago">
+                            </div> -->
+
+                            <label class="chkbxlabel">
+                                Entregue?
+                                <input type='checkbox' id="checkboxIsEntregue">
+                                <span class="material-icons">check</span>
+                            </label>
+                            <label class="chkbxlabel">
+                                Pago?
+                                <input type='checkbox' id="checkboxIsPago">
+                                <span class="material-icons">check</span>
+                            </label>
+
+                        </div>
+                        <div class="inputRow">
+                            <div class="label">
+                                Nº do Pedido:<br>
+                                <input id="inputPedido" class="input" type="text">
+                            </div>
+                            <div class="label center">
+                                Horário do Pedido:<br>
+                                <input id="inputHorario" class="input" type="time">
+                            </div>
+                            <div class="label center">
+                                Horário de Reserva:<br>
+                                <input id="inputReserva" class="input" type="time">
+                            </div>
+                            <div class="label center">
+                                Horário de Entrega:<br>
+                                <input id="inputEntrega" class="input" type="time">
+                            </div>
+                        </div>
+                        <div class="inputRow">
+                            <div class="label">
+                                Cliente:<br>
+                                <select id="selectClientes" class="input select" name="selectClientes">
+                                    <!-- opções serão inseridas aqui -->
+                                </select>
+                            </div>
+                            <div class="label">
+                                Apartamento:<br>
+                                <input id="inputApt" class="input smallw" type="text" disabled>
+                            </div>
+                            <div class="label">
+                                Torre:<br>
+                                <input id="inputTorre" class="input xsmallw" type="text" disabled>
+                                <!-- <select id="selectTorre" class="input" name="selectTorre">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                </select> -->
+                            </div>
+                            <div class="label">
+                                Forma de Pgto:<br>
+                                <select id="selectForPgto" class="input select" name="selectForPgto">
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="inputRow">
+                            <div class="label">
+                                Produto:<br>
+                                <select id="selectProduto" class="input select" name="selectProduto">
+                                    <!-- opções serão inseridas aqui -->
+                                </select>
+                            </div>
+
+                            <div id="addProdutoBtn" class="iconBtn" onclick="addProduto()"><i class="material-icons">add</i></div>
+                        </div>
+
+                        <table id="tableProdutos" class="table">
+                            <tr id="produtoHeaders" class="pedidosTd">
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+<script>
+    var idPedido
+    var pedidoAtual
+    var pedidoItens = []
+    var prodContador = 0
+    var mode // 0 = Visualização; 1 = Edição; 2 = Criação
+
+    var pedidos = []
+    var clientes = []
+    var produtos = []
+    var forpgtos = []
+
+    function refreshTable() {
+        clearTable()
+        listPedidos()
+    }
+
+    function initialize() {
+        listPedidos()
+        listClientes()
+        listProdutos()
+        listForPgtos()
+    }
+
+    function listPedidos() {
+        let url = "http://localhost:3000/listPedidos";
+        axios.get(url).then(response => {
+            pedidos = response.data
+            loadTable()
+        })
+    }
+    function listClientes() {
+        let url = "http://localhost:3000/listClientes";
+        axios.get(url).then(response => {
+            clientes = response.data
+        })
+    }
+    function listProdutos() {
+        let url = "http://localhost:3000/listProdutos";
+        axios.get(url).then(response => {
+            produtos = response.data
+        })
+    }
+    function listForPgtos() {
+        let url = "http://localhost:3000/listForPgtos";
+        axios.get(url).then(response => {
+            forpgtos = response.data
+            console.log(forpgtos)
+        })
+    }
+
+    function loadSelectClientes() {
+        let selectClientes = document.getElementById('selectClientes')
+        let l = selectClientes.children.length
+        if (selectClientes.children){
+            for (let i = 0; i < l; i++) {
+                selectClientes.removeChild(selectClientes.children[0])
+            }
+        }
+
+        if (clientes) {
+            clientes.forEach((cliente) => {
+                let option = document.createElement('option')
+                option.setAttribute('value', cliente.id)
+                option.innerHTML = cliente.descricao
+                selectClientes.appendChild(option)
+            })
+        }
+    }
+
+    function loadForPgto(){
+        let selectForPgtos = document.getElementById('selectForPgto')
+        let l = selectForPgtos.children.length
+        if (selectForPgtos.children){
+            for (let i = 0; i < l; i++) {
+                selectForPgtos.removeChild(selectForPgtos.children[0])
+            }
+        }
+
+        if (forpgtos) {
+            forpgtos.forEach((forpgto) => {
+                let option = document.createElement('option')
+                option.setAttribute('value', forpgto.id)
+                option.innerHTML = forpgto.descricao
+                selectForPgtos.appendChild(option)
+            })
+        }
+    }
+
+    function loadProdutos() {
+        let selectProdutos = document.getElementById('selectProduto')
+        let l = selectProdutos.children.length
+        if (selectProdutos.children){
+            for (let i = 0; i < l; i++) {
+                selectProdutos.removeChild(selectProdutos.children[0])
+            }
+        }
+
+        if (produtos) {
+            produtos.forEach((produto) => {
+                let option = document.createElement('option')
+                option.setAttribute('value', produto.id)
+                option.innerHTML = produto.descricao
+                selectProdutos.appendChild(option)
+            })
+        }
+    }
+    
+    function loadTable() {
+        pedidos.forEach((pedido) => {
+            var row = document.createElement('tr')
+
+            row.innerHTML = `
+                <td class="pedidosTd"> ${pedido.id} </td>
+                <td class="pedidosTd"> ${pedido.cliente.descricao} </td>
+                <td class="pedidosTd"> ${pedido.cliente.apt} </td>
+                <td class="pedidosTd"> ${pedido.cliente.torre} </td>
+                <td class="pedidosTd"> R$ ${pedido.valortotal} </td>
+                <td class="pedidosTd"> 
+                    <span class="tablebtn_v" onclick="viewItem(${pedido.id})"><i class="material-icons">remove_red_eye</i></span>    
+                    <span class="tablebtn_e" onclick="editItem(${pedido.id})"><i class="material-icons">edit</i></span>    
+                    <span class="tablebtn_d" onclick="del(${pedido.id})"><i class="material-icons">delete</i></span>
+                </td>
+            `
+
+            table.appendChild(row)
+        })
+    }
+
+    function clearTable(){
+        let table = document.getElementById("table")
+
+        if (table.children){
+            for (var i = table.rows.length - 1; i > 0; i--){
+                table.deleteRow(i)
+            }
+        }
+    }
+
+    function newItem() {
+        mode = 2
+        pedidoAtual = {}
+        placeHeaderProdutos()
+        
+        let dialog = document.getElementById('dialogMain')
+        let saveBtn = document.getElementById('saveBtn')
+        let tituloId = document.getElementById('idSlot')
+        let tituloCliente = document.getElementById('clienteSlot')
+        
+        // PEGA OS INPUTS PARA ATRIBUIÇÃO DO VALOR
+        tituloId.textContent = 'novo'
+        tituloCliente.textContent = 'novo'
+
+        // ATRIBUIÇÃO VALOR INPUTS
+        document.getElementById('inputPedido').value = ''
+        document.getElementById('inputHorario').value = ''
+        document.getElementById('inputReserva').value = ''
+        document.getElementById('inputEntrega').value = ''
+        document.getElementById('selectClientes').value = ''
+        document.getElementById('selectForPgto').value = ''
+        clearTableProdutos()
+        loadSelectClientes()
+        loadProdutos()
+        loadForPgto()
+
+        if (saveBtn.classList.contains('hidden')){
+            saveBtn.classList.remove('hidden')
+        }
+        if (dialog.classList.contains('hidden')){
+            dialog.classList.remove('hidden')
+        }
+    }
+    function viewItem(id) {
+        mode = 0
+
+        placeHeaderProdutos()
+        loadSelectClientes()
+        loadProdutos()
+        loadForPgto()
+        
+        let dialog = document.getElementById('dialogMain')
+        let tituloId = document.getElementById('idSlot')
+        let tituloCliente = document.getElementById('clienteSlot')
+        document.getElementById('checkboxIsEntregue').setAttribute('disabled', true)
+        document.getElementById('checkboxIsPago').setAttribute('disabled', true)
+        document.getElementById('inputPedido').setAttribute('disabled', true)
+        document.getElementById('inputHorario').setAttribute('disabled', true)
+        document.getElementById('inputReserva').setAttribute('disabled', true)
+        document.getElementById('inputEntrega').setAttribute('disabled', true)
+        document.getElementById('selectClientes').setAttribute('disabled', true)
+        document.getElementById('selectForPgto').setAttribute('disabled', true)
+        document.getElementById('selectProduto').classList.add('hidden')
+        document.getElementById('addProdutoBtn').classList.add('hidden')
+
+        // PEGA OS INPUTS PARA ATRIBUIÇÃO DO VALOR
+        if (id){
+            pedidos.forEach((pedido) => {
+                if(pedido.id == id){
+                    pedidoAtual = pedido
+                    
+                    tituloId.textContent = pedido.id
+                    tituloCliente.textContent = pedido.cliente.descricao
+                    
+                    // ATRIBUIÇÃO VALOR INPUTS
+                    document.getElementById('checkboxIsEntregue').checked = pedido.isentregue
+                    document.getElementById('checkboxIsPago').checked = pedido.ispago
+                    document.getElementById('inputPedido').value = pedido.id
+                    document.getElementById('inputHorario').value = pedido.pedHora
+                    document.getElementById('inputReserva').value = pedido.resHora
+                    document.getElementById('inputEntrega').value = pedido.entHora
+                    document.getElementById('inputApt').value = pedido.cliente.apt
+                    document.getElementById('inputTorre').value = pedido.cliente.torre
+                    document.getElementById('selectClientes').value = pedido.fk_cliente
+                    document.getElementById('selectForPgto').value = pedido.fk_forpgto
+                    clearTableProdutos()
+                    loadTableProdutos(pedido.pedidoItens, mode)
+                }
+
+                if (dialog.classList.contains('hidden')){
+                    dialog.classList.remove('hidden')
+                }
+            })
+        }
+    }
+    function editItem(id) {
+        mode = 1
+        placeHeaderProdutos()
+        loadSelectClientes()
+        loadProdutos()
+        loadForPgto()
+
+        let dialog = document.getElementById('dialogMain')
+        let saveBtn = document.getElementById('saveBtn')
+        let tituloId = document.getElementById('idSlot')
+        let tituloCliente = document.getElementById('clienteSlot')
+        document.getElementById('checkboxIsEntregue').removeAttribute('disabled')
+        document.getElementById('checkboxIsPago').removeAttribute('disabled')
+        document.getElementById('inputPedido').setAttribute('disabled', true)
+        document.getElementById('inputHorario').removeAttribute('disabled')
+        document.getElementById('inputReserva').removeAttribute('disabled')
+        document.getElementById('inputEntrega').removeAttribute('disabled')
+        document.getElementById('selectClientes').removeAttribute('disabled')
+        document.getElementById('selectForPgto').removeAttribute('disabled')
+        document.getElementById('selectProduto').classList.remove('hidden')
+        document.getElementById('addProdutoBtn').classList.remove('hidden')
+
+        
+        if (id){
+            pedidos.forEach((pedido) => {
+                if(pedido.id == id){
+                    pedidoAtual = pedido
+
+                    tituloId.textContent = pedido.id
+                    tituloCliente.textContent = pedido.cliente.descricao
+                    
+                    // ATRIBUIÇÃO VALOR INPUTS
+                    document.getElementById('checkboxIsEntregue').checked = pedido.isentregue
+                    document.getElementById('checkboxIsPago').checked = pedido.ispago
+                    document.getElementById('inputPedido').value = pedido.id
+                    document.getElementById('inputHorario').value = pedido.pedHora
+                    document.getElementById('inputReserva').value = pedido.resHora
+                    document.getElementById('inputEntrega').value = pedido.entHora
+                    document.getElementById('inputApt').value = pedido.cliente.apt
+                    document.getElementById('inputTorre').value = pedido.cliente.torre
+                    document.getElementById('selectClientes').value = pedido.fk_cliente
+                    document.getElementById('selectForPgto').value = pedido.fk_forpgto
+                    clearTableProdutos()
+                    loadTableProdutos(pedido.pedidoItens, mode)
+                    
+                }
+            })
+
+            if (saveBtn.classList.contains('hidden')){
+                saveBtn.classList.remove('hidden')
+            }
+            if (dialog.classList.contains('hidden')){
+                dialog.classList.remove('hidden')
+            }
+        }
+    }
+
+    function closeDialog() {
+        let dialog = document.getElementById('dialogMain')
+        let saveBtn = document.getElementById('saveBtn')
+
+        document.getElementById('checkboxIsEntregue').removeAttribute('disabled')
+        document.getElementById('checkboxIsPago').removeAttribute('disabled')
+        document.getElementById('inputPedido').removeAttribute('disabled')
+        document.getElementById('inputHorario').removeAttribute('disabled')
+        document.getElementById('inputReserva').removeAttribute('disabled')
+        document.getElementById('inputEntrega').removeAttribute('disabled')
+        document.getElementById('selectClientes').removeAttribute('disabled')
+        document.getElementById('selectForPgto').removeAttribute('disabled')
+        document.getElementById('selectProduto').classList.remove('hidden')
+        document.getElementById('addProdutoBtn').classList.remove('hidden')
+
+        saveBtn.classList.add('hidden')
+        dialog.classList.add('hidden')
+
+        prodContador = 0
+    }
+
+    // ####################### CALL SERVICES BACK-END ###############################
+
+    function save(){
+        let id = pedidoAtual ? pedidoAtual.id : ''
+        let pedido
+        pedido = {
+            id: id,
+            pedhora: document.getElementById('inputHorario').value,
+            reshora: document.getElementById('inputReserva').value,
+            enthora: document.getElementById('inputEntrega').value,
+            fk_cliente: document.getElementById('selectClientes').value,
+            fk_forpgto: document.getElementById('selectForPgto').value,
+            isentregue: document.getElementById('checkboxIsEntregue').checked,
+            ispago: document.getElementById('checkboxIsPago').checked,
+            pedidoItens: [],
+        }
+
+        let tableitens = document.getElementById('tableProdutos')
+
+        if (tableitens.children){
+            for (var i = tableitens.rows.length - 1; i > 0; i--){
+                console.log(tableitens.children[i])
+                var cells = tableitens.rows[i].querySelectorAll('.pedidosTd')
+
+                // console.log(cells[2].children[0].value)
+                pedido.pedidoItens.push({
+                    fk_produto: cells[1].innerText.split(' - ')[0],
+                    obs: cells[2].children[0].value
+                })
+            }
+        }
+        
+        console.log(pedido)
+        if(mode == 1){ // MODO EDIÇÃO
+            requestbackend('updatePedido', pedido, true)
+        }
+        else if(mode == 2){ // MODO CRIAÇÃO
+            requestbackend('newPedido', pedido, true)
+        }
+    }
+    async function del(id){
+        console.log(id)
+        let data = {
+            id: id
+        }
+        await requestbackend('delPedido', data, true)
+        
+    }
+
+    function requestbackend(module, data, ispost) {
+        const target = `http://localhost:3000/${module}`
+        if (ispost == true) {
+            axios.post(target, data)
+            .then(response => {
+                console.log('Resposta da requisição POST:', response.data);
+            })
+            .catch(error => {
+                console.error('Erro na requisição POST:', error);
+            });
+            setTimeout(() => {
+                // location.reload();
+                refreshTable()
+                closeDialog()
+            }, 500)
+        }
+        else {
+            axios.get(target, data)
+            .then(response => {
+                console.log('Resposta da requisição POST:', response.data);
+            })
+            .catch(error => {
+                console.error('Erro na requisição POST:', error);
+            });
+        }
+        
+    }
+
+    // ####################### TABELA DE PRODUTOS NO DIALOG #########################
+
+    function placeHeaderProdutos() {
+        let produtoHeaders = document.getElementById('produtoHeaders')
+
+        if (mode == 0){
+            produtoHeaders.innerHTML = "<th>Item</th> <th>Produto</th> <th>Observação</th> <th>Valor</th>"
+        }
+        else {
+            produtoHeaders.innerHTML = "<th>Item</th> <th>Produto</th> <th>Observação</th> <th>Valor</th> <th>Ações</th>"
+        }
+    }
+
+    function loadTableProdutos(itensPedido, dialogMode) {
+        prodContador = 0
+        var table = document.getElementById("tableProdutos")
+
+        if(itensPedido) {
+            itensPedido.forEach((item) => {
+                prodContador++
+
+                let row = document.createElement('tr')
+                console.log('modo', dialogMode)
+                row.innerHTML = `
+                    <td class="pedidosTd"> ${prodContador} </td> 
+                    <td class="pedidosTd"> ${item.descricao} </td>
+                    <td class="pedidosTd"> <input class="input" type="text" value="${item.obs}" ${dialogMode > 0 ? '' : 'disabled'}></input> </td>
+                    <td class="pedidosTd"> R$ ${item.valor} </td>
+                    ${mode > 0 ? `
+                        <td class="pedidosTd"> 
+                            <span id="prod-${prodContador}" class="tablebtn_d" onclick="removeProduto('prod-${prodContador}')">D</span>    
+                        </td>
+                    ` : ''}
+                `
+                
+                // <td class="pedidosTd"> 
+                //     <span id="prod-${prodContador}" class="tablebtn_d" onclick="removeProduto('prod-${prodContador}')">D</span>    
+                // </td>
+
+                console.log(row)
+
+                table.appendChild(row)
+            })
+        }
+    }
+    function clearTableProdutos(){
+        let table = document.getElementById("tableProdutos")
+
+        if (table.children){
+            for (var i = table.rows.length - 1; i > 0; i--){
+                table.deleteRow(i)
+            }
+        }
+    }
+    function addProduto() {
+        let selectedProduto = document.getElementById('selectProduto').value
+
+        if(produtos) {
+            produtos.forEach((produto) => {
+                if(produto.id == selectedProduto){
+                    prodContador++
+                    var table = document.getElementById("tableProdutos")
+                    var row = document.createElement('tr')
+
+                    row.innerHTML = `
+                        <td class="pedidosTd"> ${prodContador} </td>
+                        <td class="pedidosTd"> ${produto.descricao} </td>
+                        <td class="pedidosTd"><input class="input" type="text"></input></td>
+                        <td class="pedidosTd"> R$ ${produto.valor} </td>
+                        <td class="pedidosTd"> 
+                            <span id="prod-${prodContador}" class="tablebtn_d" onclick="removeProduto('prod-${prodContador}')"><i class="material-icons">delete</i></span>    
+                        </td>
+                    `
+                    table.appendChild(row)
+                }
+            })
+        }
+    }
+    function removeProduto(id) {
+        let table = document.getElementById("tableProdutos") 
+        let rowForDeletion = document.getElementById(id).parentElement.parentElement
+        table.removeChild(rowForDeletion)
+        pedidoAtual.itensPedido.forEach((item, index) => {
+            let itemIndex = id.split('-')[1] - 1
+            if (index == itemIndex) {
+                // console.log(index)
+                // console.log(itemIndex)
+                // console.log(pedidoAtual.itensPedido)
+                pedidoAtual.itensPedido.splice(itemIndex, 1)
+            }
+        })
+
+        clearTableProdutos()
+        loadTableProdutos(pedidoAtual.pedidoItens)
+        console.log(pedidoAtual)
+    }
+
+    function toggleCheckbox(checkboxId) {
+        const checkbox = document.getElementById(checkboxId);
+        checkbox.checked = !checkbox.checked;
+    }
+</script>
