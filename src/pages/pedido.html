@@ -26,13 +26,24 @@
                 </div>
 
                 <div class="card-body">
+                    <div class="inputRow filterBox">
+                        <p class="filterBoxTitle">Filtros:</p>
+                        <div class="label center">
+                            Data Inicial:<br>
+                            <input id="inputFInicial" class="input" type="date">
+                        </div>
+                        <div class="label center">
+                            Data Final:<br>
+                            <input id="inputFFinal" class="input" type="date">
+                        </div>
+                    </div>
                     <div class="inputRow">
                         <div class="closeBtn" onclick="refreshTable()">Atualizar Tabela</div>
                         <div class="closeBtn" onclick="newItem()">Novo Pedido</div>
                     </div>
                     <table id="table" class="table">
                         <tr class="tableTd">
-                            <th>Nº</th> <th>Cliente</th> <th>Apartamento</th> <th>Bloco</th> <th>Valor</th> <th>Ações</th>
+                            <th>Nº</th> <th>Data</th> <th>Cliente</th> <th>Apartamento</th> <th>Bloco</th> <th>Valor</th> <th>Ações</th>
                         </tr>
     
                         <!-- linhas serão inseridas aqui -->
@@ -52,14 +63,6 @@
 
                     <div class="card-body">
                         <div class="inputRow">
-                            <!-- <div class="label">
-                                Entregue?: <input type="checkbox" id="checkboxIsentregue" name="isentregue"><i class="material-icons mainBtn_icon"></i>
-                            </div>
-                            
-                            <div class="label">
-                                Pago?: <input type="checkbox" id="checkboxIspago" name="ispago">
-                            </div> -->
-
                             <label class="chkbxlabel">
                                 Entregue?
                                 <input type='checkbox' id="checkboxIsEntregue">
@@ -150,6 +153,7 @@
     }
 
     function initialize() {
+        getInitialDate()
         listPedidos()
         listClientes()
         listProdutos()
@@ -158,8 +162,20 @@
 
     function listPedidos() {
         let url = "http://localhost:3000/listPedidos";
+
+        let params = new URLSearchParams()
+        params.append('filtro1', document.getElementById("inputFInicial").value);
+        params.append('filtro2', document.getElementById("inputFFinal").value);
+
+        console.log(params)
+        url += `?${params.toString()}`
+
         axios.get(url).then(response => {
             pedidos = response.data
+            pedidos.forEach((pedido) => {
+                let dataTemp = pedido.peddata.split('T')[0].split('-')
+                pedido.peddata = `${dataTemp[2]}-${dataTemp[1]}-${dataTemp[0]}`
+            })
             loadTable()
         })
     }
@@ -246,6 +262,7 @@
 
             row.innerHTML = `
                 <td class="tableTd"> ${pedido.id} </td>
+                <td class="tableTd"> ${pedido.peddata} </td>
                 <td class="tableTd"> ${pedido.cliente.descricao} </td>
                 <td class="tableTd"> ${pedido.cliente.apt} </td>
                 <td class="tableTd"> ${pedido.cliente.torre} </td>
@@ -603,5 +620,19 @@
     function toggleCheckbox(checkboxId) {
         const checkbox = document.getElementById(checkboxId);
         checkbox.checked = !checkbox.checked;
+    }
+
+    function getInitialDate() {
+        const dataAtual = new Date();
+        const ano = dataAtual.getFullYear()
+        const mes = dataAtual.getMonth() + 1
+        const dia = dataAtual.getDate()
+        const date = `${ano}-${mes}-${dia}`
+
+        const filtro1 = document.getElementById('inputFInicial')
+        const filtro2 = document.getElementById('inputFFinal')
+
+        filtro1.value = date
+        filtro2.value = date
     }
 </script>

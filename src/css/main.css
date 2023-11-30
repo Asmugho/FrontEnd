@@ -86,6 +86,24 @@ body{
     display: grid;
 }
 
+.filterBoxTitle{
+    position: absolute;
+    margin-left: 10px;
+    margin-top: -32px;
+    background-color: rgb(49 49 49);
+    color: white;
+    font-size: 20px;
+    font-weight: 500;
+    padding: 10px;
+}
+.filterBox{
+    border-style: solid;
+    border-color: #494949;
+    border-width: 1px;
+    margin-bottom: 50px;
+    padding-top: 10px;
+}
+
 /*   INDEX.HTML   */
 .homeBtn{
     font-size: 25px;
