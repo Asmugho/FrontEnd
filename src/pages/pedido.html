@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <link rel="stylesheet" href="../css/main.css">
-        <title>Home - ERPizza</title>
+        <title>Pedidos - ERPizza</title>
     </head>
     <body onload="initialize()">
         <div class="topbar">
@@ -13,8 +13,8 @@
             <div class="pageBtns">
                 <a class="removeLink topbarBtn" href="./pedido.html">PEDIDOS</a>
                 <a class="removeLink topbarBtn" href="./produto.html">PRODUTOS</a>
-                <a class="removeLink topbarBtn" href="./src/pages/">CLIENTES</a>
-                <a class="removeLink topbarBtn" href="./src/pages/">FORMA PGTOS</a>
+                <a class="removeLink topbarBtn" href="./cliente.html">CLIENTES</a>
+                <a class="removeLink topbarBtn" href="./forpgto.html">FORMA PGTOS</a>
             </div>
             <img class="topbarLogo" src="../images/logo.png" alt="">
         </div>
@@ -29,7 +29,6 @@
                     <div class="inputRow">
                         <div class="closeBtn" onclick="refreshTable()">Atualizar Tabela</div>
                         <div class="closeBtn" onclick="newItem()">Novo Pedido</div>
-                        <div class="closeBtn" onclick="testRequest()">TESTAR REQUEST</div>
                     </div>
                     <table id="table" class="table">
                         <tr class="tableTd">
@@ -93,7 +92,7 @@
                         <div class="inputRow">
                             <div class="label">
                                 Cliente:<br>
-                                <select id="selectClientes" class="input select" name="selectClientes">
+                                <select id="selectClientes" class="input select" name="selectClientes" onchange="placeAptTorre()">
                                     <!-- opções serão inseridas aqui -->
                                 </select>
                             </div>
@@ -590,6 +589,15 @@
         clearTableProdutos()
         loadTableProdutos(pedidoAtual.pedidoItens)
         console.log(pedidoAtual)
+    }
+
+    function placeAptTorre() {
+        const selectClientes = document.getElementById("selectClientes")
+        
+        let clienteEncontrado = clientes.find(cliente => cliente.id == selectClientes.value)
+        
+        document.getElementById("inputApt").value = clienteEncontrado.apt
+        document.getElementById("inputTorre").value = clienteEncontrado.torre
     }
 
     function toggleCheckbox(checkboxId) {

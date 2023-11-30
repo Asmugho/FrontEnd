@@ -1,6 +1,6 @@
 html{
     /* background-color: black; */
-    background: black url(../images/wallpaperflare.com_wallpaper.png);
+    background: black url(../images/wallpaperflare.com_wallpaper.png) no-repeat;
     background-size: cover;
     /* background-position-y: bottom; */
     display: grid;

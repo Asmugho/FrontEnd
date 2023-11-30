@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <link rel="stylesheet" href="../css/main.css">
-        <title>Produtos - ERPizza</title>
+        <title>Formas de Pagamento - ERPizza</title>
     </head>
     <body onload="initialize()">
         <div class="topbar">
@@ -22,17 +22,17 @@
         <div class="container">
             <div class="card">
                 <div class="card-titlebar">
-                    <span>PRODUTOS</span>
+                    <span>FORMAS DE PAGAMENTO</span>
                 </div>
 
                 <div class="card-body">
                     <div class="inputRow">
                         <div class="closeBtn" onclick="refreshTable()">Atualizar Tabela</div>
-                        <div class="closeBtn" onclick="newItem()">Novo Produto</div>
+                        <div class="closeBtn" onclick="newItem()">Nova Forma de Pagamento</div>
                     </div>
                     <table id="table" class="table">
                         <tr class="tableTd">
-                            <th>Nº</th> <th>Produto</th> <th>Valor</th> <th>Ativo?</th> <th>Ações</th>
+                            <th>Nº</th> <th>Nome</th> <th>Ações</th>
                         </tr>
     
                         <!-- linhas serão inseridas aqui -->
@@ -53,22 +53,13 @@
                     <div class="card-body">
                         <div class="inputRow">
                             <div class="label">
-                                Nº do Produto:<br>
+                                Nº da ForPgto:<br>
                                 <input id="inputId" class="input" type="text" disabled>
                             </div>
                             <div class="label">
-                                Nome do Produto:<br>
-                                <input id="inputNomeProd" class="input type="text">
+                                Nome da Forma de Pagamento:<br>
+                                <input id="inputNomeForPgto" class="input type="text">
                             </div>
-                            <div class="label">
-                                Valor:<br>
-                                <input id="inputValor" class="input smallw" type="text">
-                            </div>
-                            <label class="chkbxlabel">
-                                Ativo?
-                                <input type='checkbox' id="checkboxIsAtivo">
-                                <span class="material-icons">check</span>
-                            </label>
                         </div>
                     </div>
                 </div>
@@ -77,44 +68,41 @@
     </body>
 </html>
 <script>
-    var idProduto
-    var produtoAtual
+    var idForPgto
+    var forPgtoAtual
     var mode // 0 = Visualização; 1 = Edição; 2 = Criação
 
-    var produtos = []
+    var forPgtos = []
 
     function refreshTable() {
         clearTable()
-        listProdutos()
+        listForPgtos()
     }
 
     function initialize() {
-        listProdutos()
+        listForPgtos()
     }
 
-    function listProdutos() {
-        let url = "http://localhost:3000/listProdutos";
+    function listForPgtos() {
+        let url = "http://localhost:3000/listForPgtos";
         axios.get(url).then(response => {
             console.log(response.data)
-            produtos = response.data
+            forPgtos = response.data
             loadTable()
         })
     }
 
     function loadTable() {
-        produtos.forEach((produto) => {
-            console.log(produto)
+        forPgtos.forEach((forPgto) => {
             var row = document.createElement('tr')
 
             row.innerHTML = `
-                <td class="tableTd"> ${produto.id} </td>
-                <td class="tableTd"> ${produto.nomeproduto} </td>
-                <td class="tableTd"> ${produto.valor} </td>
-                <td class="tableTd"> ${produto.isativo} </td>
+                <td class="tableTd"> ${forPgto.id} </td>
+                <td class="tableTd"> ${forPgto.nome} </td>
                 <td class="tableTd"> 
-                    <span class="tablebtn_v" onclick="viewItem(${produto.id})"><i class="material-icons">remove_red_eye</i></span>    
-                    <span class="tablebtn_e" onclick="editItem(${produto.id})"><i class="material-icons">edit</i></span>    
-                    <span class="tablebtn_d" onclick="del(${produto.id})"><i class="material-icons">delete</i></span>
+                    <span class="tablebtn_v" onclick="viewItem(${forPgto.id})"><i class="material-icons">remove_red_eye</i></span>    
+                    <span class="tablebtn_e" onclick="editItem(${forPgto.id})"><i class="material-icons">edit</i></span>    
+                    <span class="tablebtn_d" onclick="del(${forPgto.id})"><i class="material-icons">delete</i></span>
                 </td>
             `
 
@@ -134,19 +122,17 @@
 
     function newItem() {
         mode = 2
-        produtoAtual = {}
+        pedidoAtual = {}
         
         let dialog = document.getElementById('dialogMain')
         let saveBtn = document.getElementById('saveBtn')
         let modeSlot = document.getElementById('modeSlot')
         
-        modeSlot.textContent = 'Criando Produto'
+        modeSlot.textContent = 'Criando Forma de Pagamento'
 
         // ATRIBUIÇÃO VALOR INPUTS
         document.getElementById('inputId').value = ''
-        document.getElementById('inputNomeProd').value = ''
-        document.getElementById('inputValor').value = ''
-        document.getElementById('checkboxIsAtivo').value = false
+        document.getElementById('inputNomeForPgto').value = ''
 
         if (saveBtn.classList.contains('hidden')){
             saveBtn.classList.remove('hidden')
@@ -160,23 +146,18 @@
 
         let dialog = document.getElementById('dialogMain')
         let modeSlot = document.getElementById('modeSlot')
-        document.getElementById('inputNomeProd').setAttribute('disabled', true)
-        document.getElementById('inputValor').setAttribute('disabled', true)
-        document.getElementById('checkboxIsAtivo').setAttribute('disabled', true)
-        
+        document.getElementById('inputNomeForPgto').setAttribute('disabled', true)
         
         // PEGA OS INPUTS PARA ATRIBUIÇÃO DO VALOR
         if (id){
-            produtos.forEach((produto) => {
-                if(produto.id == id){
-                    produtoAtual = produto
-                    modeSlot.textContent = 'Visualizando Produto'
+            forPgtos.forEach((forPgto) => {
+                if(forPgto.id == id){
+                    forPgtoAtual = forPgto
+                    modeSlot.textContent = 'Visualizando Forma de Pagamento'
                     
                     // ATRIBUIÇÃO VALOR INPUTS
-                    document.getElementById('inputId').value = produto.id
-                    document.getElementById('inputNomeProd').value = produto.nomeproduto
-                    document.getElementById('inputValor').value = produto.valor
-                    document.getElementById('checkboxIsAtivo').checked = produto.isativo
+                    document.getElementById('inputId').value = forPgto.id
+                    document.getElementById('inputNomeForPgto').value = forPgto.nome
                 }
 
                 if (dialog.classList.contains('hidden')){
@@ -191,21 +172,17 @@
         let dialog = document.getElementById('dialogMain')
         let saveBtn = document.getElementById('saveBtn')
         let modeSlot = document.getElementById('modeSlot')
-        document.getElementById('inputNomeProd').removeAttribute('disabled')
-        document.getElementById('inputValor').removeAttribute('disabled', true)
-        document.getElementById('checkboxIsAtivo').removeAttribute('disabled')
+        document.getElementById('inputNomeForPgto').removeAttribute('disabled')
         
         if (id){
-            produtos.forEach((produto) => {
-                if(produto.id == id){
-                    produtoAtual = produto
-                    modeSlot.textContent = 'Editando Produto'
+            forPgtos.forEach((forPgto) => {
+                if(forPgto.id == id){
+                    forPgtoAtual = forPgto
+                    modeSlot.textContent = 'Editando Forma de Pagamento'
 
                     // ATRIBUIÇÃO VALOR INPUTS
-                    document.getElementById('inputId').value = produto.id
-                    document.getElementById('inputNomeProd').value = produto.nomeproduto
-                    document.getElementById('inputValor').value = produto.valor
-                    document.getElementById('checkboxIsAtivo').checked = produto.isativo
+                    document.getElementById('inputId').value = forPgto.id
+                    document.getElementById('inputNomeForPgto').value = forPgto.nome
                 }
             })
 
@@ -222,9 +199,7 @@
         let dialog = document.getElementById('dialogMain')
         let saveBtn = document.getElementById('saveBtn')
 
-        document.getElementById('inputNomeProd').removeAttribute('disabled')
-        document.getElementById('inputValor').removeAttribute('disabled')
-        document.getElementById('checkboxIsAtivo').removeAttribute('disabled')
+        document.getElementById('inputNomeForPgto').removeAttribute('disabled')
 
         saveBtn.classList.add('hidden')
         dialog.classList.add('hidden')
@@ -235,23 +210,18 @@
     // ####################### CALL SERVICES BACK-END ###############################
 
     function save(){
-        let id = produtoAtual ? produtoAtual.id : ''
-        let produto
-        produto = {
+        let id = forPgtoAtual ? forPgtoAtual.id : ''
+        let forPgto
+        forPgto = {
             id: id,
-            nomeproduto: document.getElementById('inputNomeProd').value,
-            valor: document.getElementById('inputValor').value,
-            isativo: document.getElementById('checkboxIsAtivo').checked,
+            nome: document.getElementById('inputNomeForPgto').value,
         }
-
-        console.log(mode)
-        console.log(produto)
 
         if(mode == 1){ // MODO EDIÇÃO
-            requestbackend('updateProduto', produto, true)
+            requestbackend('updateForPgto', forPgto, true)
         }
         else if(mode == 2){ // MODO CRIAÇÃO
-            requestbackend('newProduto', produto, true)
+            requestbackend('newForPgto', forPgto, true)
         }
     }
     async function del(id){
@@ -259,7 +229,7 @@
         let data = {
             id: id
         }
-        await requestbackend('delProduto', data, true)
+        await requestbackend('delForPgto', data, true)
         
     }
 

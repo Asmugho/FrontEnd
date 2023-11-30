@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <link rel="stylesheet" href="../css/main.css">
-        <title>Produtos - ERPizza</title>
+        <title>Clientes - ERPizza</title>
     </head>
     <body onload="initialize()">
         <div class="topbar">
@@ -22,17 +22,17 @@
         <div class="container">
             <div class="card">
                 <div class="card-titlebar">
-                    <span>PRODUTOS</span>
+                    <span>CLIENTES</span>
                 </div>
 
                 <div class="card-body">
                     <div class="inputRow">
                         <div class="closeBtn" onclick="refreshTable()">Atualizar Tabela</div>
-                        <div class="closeBtn" onclick="newItem()">Novo Produto</div>
+                        <div class="closeBtn" onclick="newItem()">Novo Cliente</div>
                     </div>
                     <table id="table" class="table">
                         <tr class="tableTd">
-                            <th>Nº</th> <th>Produto</th> <th>Valor</th> <th>Ativo?</th> <th>Ações</th>
+                            <th>Nº</th> <th>Nome</th> <th>Logradouro</th> <th>Apto</th> <th>Torre</th> <th>Ações</th>
                         </tr>
     
                         <!-- linhas serão inseridas aqui -->
@@ -53,22 +53,27 @@
                     <div class="card-body">
                         <div class="inputRow">
                             <div class="label">
-                                Nº do Produto:<br>
+                                Nº do Cliente:<br>
                                 <input id="inputId" class="input" type="text" disabled>
                             </div>
                             <div class="label">
-                                Nome do Produto:<br>
-                                <input id="inputNomeProd" class="input type="text">
+                                Nome do Cliente:<br>
+                                <input id="inputNomeCli" class="input" type="text">
+                            </div>
+                        </div>
+                        <div class="inputRow">
+                            <div class="label">
+                                Logradouro:<br>
+                                <input id="inputLogr" class="input" type="text">
                             </div>
                             <div class="label">
-                                Valor:<br>
-                                <input id="inputValor" class="input smallw" type="text">
+                                Apto:<br>
+                                <input id="inputApto" class="input smallw" type="text">
                             </div>
-                            <label class="chkbxlabel">
-                                Ativo?
-                                <input type='checkbox' id="checkboxIsAtivo">
-                                <span class="material-icons">check</span>
-                            </label>
+                            <div class="label">
+                                Torre:<br>
+                                <input id="inputTorre" class="input xsmallw" type="text">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -77,44 +82,43 @@
     </body>
 </html>
 <script>
-    var idProduto
-    var produtoAtual
+    var idCliente
+    var clienteAtual
     var mode // 0 = Visualização; 1 = Edição; 2 = Criação
 
-    var produtos = []
+    var clientes = []
 
     function refreshTable() {
         clearTable()
-        listProdutos()
+        listClientes()
     }
 
     function initialize() {
-        listProdutos()
+        listClientes()
     }
 
-    function listProdutos() {
-        let url = "http://localhost:3000/listProdutos";
+    function listClientes() {
+        let url = "http://localhost:3000/listClientes";
         axios.get(url).then(response => {
-            console.log(response.data)
-            produtos = response.data
+            clientes = response.data
             loadTable()
         })
     }
 
     function loadTable() {
-        produtos.forEach((produto) => {
-            console.log(produto)
+        clientes.forEach((cliente) => {
             var row = document.createElement('tr')
 
             row.innerHTML = `
-                <td class="tableTd"> ${produto.id} </td>
-                <td class="tableTd"> ${produto.nomeproduto} </td>
-                <td class="tableTd"> ${produto.valor} </td>
-                <td class="tableTd"> ${produto.isativo} </td>
+                <td class="tableTd"> ${cliente.id} </td>
+                <td class="tableTd"> ${cliente.nome} </td>
+                <td class="tableTd"> ${cliente.logradouro ? cliente.logradouro : '-'} </td>
+                <td class="tableTd"> ${cliente.apt} </td>
+                <td class="tableTd"> ${cliente.torre} </td>
                 <td class="tableTd"> 
-                    <span class="tablebtn_v" onclick="viewItem(${produto.id})"><i class="material-icons">remove_red_eye</i></span>    
-                    <span class="tablebtn_e" onclick="editItem(${produto.id})"><i class="material-icons">edit</i></span>    
-                    <span class="tablebtn_d" onclick="del(${produto.id})"><i class="material-icons">delete</i></span>
+                    <span class="tablebtn_v" onclick="viewItem(${cliente.id})"><i class="material-icons">remove_red_eye</i></span>    
+                    <span class="tablebtn_e" onclick="editItem(${cliente.id})"><i class="material-icons">edit</i></span>    
+                    <span class="tablebtn_d" onclick="del(${cliente.id})"><i class="material-icons">delete</i></span>
                 </td>
             `
 
@@ -134,19 +138,20 @@
 
     function newItem() {
         mode = 2
-        produtoAtual = {}
+        clienteAtual = {}
         
         let dialog = document.getElementById('dialogMain')
         let saveBtn = document.getElementById('saveBtn')
         let modeSlot = document.getElementById('modeSlot')
         
-        modeSlot.textContent = 'Criando Produto'
+        modeSlot.textContent = 'Criando Cliente'
 
         // ATRIBUIÇÃO VALOR INPUTS
         document.getElementById('inputId').value = ''
-        document.getElementById('inputNomeProd').value = ''
-        document.getElementById('inputValor').value = ''
-        document.getElementById('checkboxIsAtivo').value = false
+        document.getElementById('inputNomeCli').value = ''
+        document.getElementById('inputLogr').value = ''
+        document.getElementById('inputApto').value = ''
+        document.getElementById('inputTorre').value = ''
 
         if (saveBtn.classList.contains('hidden')){
             saveBtn.classList.remove('hidden')
@@ -160,23 +165,25 @@
 
         let dialog = document.getElementById('dialogMain')
         let modeSlot = document.getElementById('modeSlot')
-        document.getElementById('inputNomeProd').setAttribute('disabled', true)
-        document.getElementById('inputValor').setAttribute('disabled', true)
-        document.getElementById('checkboxIsAtivo').setAttribute('disabled', true)
+        document.getElementById('inputNomeCli').setAttribute('disabled', true)
+        document.getElementById('inputLogr').setAttribute('disabled', true)
+        document.getElementById('inputApto').setAttribute('disabled', true)
+        document.getElementById('inputTorre').setAttribute('disabled', true)
         
         
         // PEGA OS INPUTS PARA ATRIBUIÇÃO DO VALOR
         if (id){
-            produtos.forEach((produto) => {
-                if(produto.id == id){
-                    produtoAtual = produto
-                    modeSlot.textContent = 'Visualizando Produto'
+            clientes.forEach((cliente) => {
+                if(cliente.id == id){
+                    clienteAtual = cliente
+                    modeSlot.textContent = 'Visualizando Cliente'
                     
                     // ATRIBUIÇÃO VALOR INPUTS
-                    document.getElementById('inputId').value = produto.id
-                    document.getElementById('inputNomeProd').value = produto.nomeproduto
-                    document.getElementById('inputValor').value = produto.valor
-                    document.getElementById('checkboxIsAtivo').checked = produto.isativo
+                    document.getElementById('inputId').value = cliente.id
+                    document.getElementById('inputNomeCli').value = cliente.nome
+                    document.getElementById('inputLogr').value = cliente.logradouro
+                    document.getElementById('inputApto').value = cliente.apt
+                    document.getElementById('inputTorre').value = cliente.torre
                 }
 
                 if (dialog.classList.contains('hidden')){
@@ -191,21 +198,23 @@
         let dialog = document.getElementById('dialogMain')
         let saveBtn = document.getElementById('saveBtn')
         let modeSlot = document.getElementById('modeSlot')
-        document.getElementById('inputNomeProd').removeAttribute('disabled')
-        document.getElementById('inputValor').removeAttribute('disabled', true)
-        document.getElementById('checkboxIsAtivo').removeAttribute('disabled')
+        document.getElementById('inputNomeCli').removeAttribute('disabled')
+        document.getElementById('inputLogr').removeAttribute('disabled', true)
+        document.getElementById('inputApto').removeAttribute('disabled')
+        document.getElementById('inputTorre').removeAttribute('disabled')
         
         if (id){
-            produtos.forEach((produto) => {
-                if(produto.id == id){
-                    produtoAtual = produto
-                    modeSlot.textContent = 'Editando Produto'
+            clientes.forEach((cliente) => {
+                if(cliente.id == id){
+                    clienteAtual = cliente
+                    modeSlot.textContent = 'Editando Cliente'
 
                     // ATRIBUIÇÃO VALOR INPUTS
-                    document.getElementById('inputId').value = produto.id
-                    document.getElementById('inputNomeProd').value = produto.nomeproduto
-                    document.getElementById('inputValor').value = produto.valor
-                    document.getElementById('checkboxIsAtivo').checked = produto.isativo
+                    document.getElementById('inputId').value = cliente.id
+                    document.getElementById('inputNomeCli').value = cliente.nome
+                    document.getElementById('inputLogr').value = cliente.logradouro
+                    document.getElementById('inputApto').value = cliente.apt
+                    document.getElementById('inputTorre').value = cliente.torre
                 }
             })
 
@@ -222,9 +231,10 @@
         let dialog = document.getElementById('dialogMain')
         let saveBtn = document.getElementById('saveBtn')
 
-        document.getElementById('inputNomeProd').removeAttribute('disabled')
-        document.getElementById('inputValor').removeAttribute('disabled')
-        document.getElementById('checkboxIsAtivo').removeAttribute('disabled')
+        document.getElementById('inputNomeCli').removeAttribute('disabled')
+        document.getElementById('inputLogr').removeAttribute('disabled')
+        document.getElementById('inputApto').removeAttribute('disabled')
+        document.getElementById('inputTorre').removeAttribute('disabled')
 
         saveBtn.classList.add('hidden')
         dialog.classList.add('hidden')
@@ -235,23 +245,21 @@
     // ####################### CALL SERVICES BACK-END ###############################
 
     function save(){
-        let id = produtoAtual ? produtoAtual.id : ''
-        let produto
-        produto = {
+        let id = clienteAtual ? clienteAtual.id : ''
+        let cliente
+        cliente = {
             id: id,
-            nomeproduto: document.getElementById('inputNomeProd').value,
-            valor: document.getElementById('inputValor').value,
-            isativo: document.getElementById('checkboxIsAtivo').checked,
+            nome: document.getElementById('inputNomeCli').value,
+            logradouro: document.getElementById('inputLogr').value,
+            apt: document.getElementById('inputApto').value,
+            torre: document.getElementById('inputTorre').value,
         }
-
-        console.log(mode)
-        console.log(produto)
 
         if(mode == 1){ // MODO EDIÇÃO
-            requestbackend('updateProduto', produto, true)
+            requestbackend('updateCliente', cliente, true)
         }
         else if(mode == 2){ // MODO CRIAÇÃO
-            requestbackend('newProduto', produto, true)
+            requestbackend('newCliente', cliente, true)
         }
     }
     async function del(id){
@@ -259,7 +267,7 @@
         let data = {
             id: id
         }
-        await requestbackend('delProduto', data, true)
+        await requestbackend('delCliente', data, true)
         
     }
 
