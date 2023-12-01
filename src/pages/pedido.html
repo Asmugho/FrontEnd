@@ -627,11 +627,19 @@
         const dataAtual = new Date();
         const ano = dataAtual.getFullYear()
         const mes = dataAtual.getMonth() + 1
-        const dia = dataAtual.getDate()
+        let dia = dataAtual.getDate()
+        if (dia < 10) {
+            dia = `0${dia}`
+        }
+
         const date = `${ano}-${mes}-${dia}`
+        console.log(date)
 
         const filtro1 = document.getElementById('inputFInicial')
         const filtro2 = document.getElementById('inputFFinal')
+
+        console.log(filtro1)
+        console.log(filtro2)
 
         filtro1.value = date
         filtro2.value = date
