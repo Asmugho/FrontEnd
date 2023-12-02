@@ -85,7 +85,7 @@
     }
 
     function listForPgtos() {
-        let url = "http://localhost:3000/listForPgtos";
+        let url = "http://192.168.1.11:3000/listForPgtos";
         axios.get(url).then(response => {
             console.log(response.data)
             forPgtos = response.data
@@ -235,7 +235,7 @@
     }
 
     function requestbackend(module, data, ispost) {
-        const target = `http://localhost:3000/${module}`
+        const target = `http://192.168.1.11:3000/${module}`
         if (ispost == true) {
             axios.post(target, data)
             .then(response => {

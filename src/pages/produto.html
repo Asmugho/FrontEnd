@@ -94,7 +94,7 @@
     }
 
     function listProdutos() {
-        let url = "http://localhost:3000/listProdutos";
+        let url = "http://192.168.1.11:3000/listProdutos";
         axios.get(url).then(response => {
             console.log(response.data)
             produtos = response.data
@@ -265,7 +265,7 @@
     }
 
     function requestbackend(module, data, ispost) {
-        const target = `http://localhost:3000/${module}`
+        const target = `http://192.168.1.11:3000/${module}`
         if (ispost == true) {
             axios.post(target, data)
             .then(response => {

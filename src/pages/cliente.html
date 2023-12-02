@@ -99,7 +99,7 @@
     }
 
     function listClientes() {
-        let url = "http://localhost:3000/listClientes";
+        let url = "http://192.168.1.11:3000/listClientes";
         axios.get(url).then(response => {
             clientes = response.data
             loadTable()
@@ -273,7 +273,7 @@
     }
 
     function requestbackend(module, data, ispost) {
-        const target = `http://localhost:3000/${module}`
+        const target = `http://192.168.1.11:3000/${module}`
         if (ispost == true) {
             axios.post(target, data)
             .then(response => {
