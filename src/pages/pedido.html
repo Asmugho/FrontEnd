@@ -162,7 +162,7 @@
     }
 
     function listPedidos() {
-        let url = "http://localhost:3000/listPedidos";
+        let url = "http://192.168.1.11:3000/listPedidos";
 
         let params = new URLSearchParams()
         params.append('filtro1', document.getElementById("inputFInicial").value);
@@ -181,19 +181,19 @@
         })
     }
     function listClientes() {
-        let url = "http://localhost:3000/listClientes";
+        let url = "http://192.168.1.11:3000/listClientes";
         axios.get(url).then(response => {
             clientes = response.data
         })
     }
     function listProdutos() {
-        let url = "http://localhost:3000/listProdutos";
+        let url = "http://192.168.1.11:3000/listProdutos";
         axios.get(url).then(response => {
             produtos = response.data
         })
     }
     function listForPgtos() {
-        let url = "http://localhost:3000/listForPgtos";
+        let url = "http://192.168.1.11:3000/listForPgtos";
         axios.get(url).then(response => {
             forpgtos = response.data
             console.log(forpgtos)
@@ -493,7 +493,7 @@
     }
 
     function requestbackend(module, data, ispost) {
-        const target = `http://localhost:3000/${module}`
+        const target = `http://192.168.1.11:3000/${module}`
         if (ispost == true) {
             axios.post(target, data)
             .then(response => {
